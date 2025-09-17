@@ -8,7 +8,7 @@ from tkinter import Frame, Tk, Canvas, Entry, Text, Button, PhotoImage
 
 
 OUTPUT_PATH = Path(__file__).parent
-ASSETS_PATH = OUTPUT_PATH / Path(r"E:\Sistema\Logeo\assets\frame0")
+ASSETS_PATH = OUTPUT_PATH / Path(r"C:\Sistema-de-RRHH-nortex\Logeo\assets\frame0")
 
 
 def relative_to_assets(path: str) -> Path:
@@ -19,8 +19,8 @@ def connect_to_database():
     try:
         connection = psycopg2.connect(
             host="25.40.205.49",  
-            database="prueba".encode('utf-8').decode('utf-8'),
-            user="mamon".encode('utf-8').decode('utf-8'),
+            database="postgres".encode('utf-8').decode('utf-8'),
+            user="Mamon".encode('utf-8').decode('utf-8'),
             password="7sonmasque6".encode('utf-8').decode('utf-8'),
             client_encoding='utf8'
         )
