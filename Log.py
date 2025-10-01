@@ -1,15 +1,11 @@
 from pathlib import Path
-import psycopg2
+import customtkinter as ctk
 from tkinter import messagebox
-
-# from tkinter import *
-# Explicit imports to satisfy Flake8
-from tkinter import Frame, Tk, Canvas, Entry, Text, Button, PhotoImage
-
+from PIL import Image
+import psycopg2
 
 OUTPUT_PATH = Path(__file__).parent
-ASSETS_PATH = OUTPUT_PATH / Path(r"C:\Sistema-de-RRHH-nortex\Logeo\assets\frame0")
-
+ASSETS_PATH = OUTPUT_PATH / "assets"
 
 def relative_to_assets(path: str) -> Path:
     return ASSETS_PATH / Path(path)
@@ -52,207 +48,203 @@ def authenticate_user(username, password):
     except psycopg2.Error as e:
         return False, f"Error en la consulta: {e}"
 
-def handle_login():
-    """Maneja el proceso de login"""
-    username = entry_2.get()
-    password = entry_1.get()
+class LoginApp(ctk.CTk):
+    def __init__(self):
+        super().__init__()
+        
+        self.title("Nortex - Login")
+        self.geometry("1194x639")
+        self.minsize(800, 500)
+        
+        self.grid_rowconfigure(0, weight=1)
+        self.grid_columnconfigure(0, weight=9)  # Logo section - increased weight
+        self.grid_columnconfigure(1, weight=2)  # Login panel - decreased weight
+        
+        # Variables
+        self.show_password = ctk.BooleanVar(value=False)
+        self.error_label = None
+        
+        self.create_widgets()
+        
+        # Bind Enter key to login
+        self.bind('<Return>', lambda event: self.handle_login())
     
-    # Validar que no estén vacíos o con placeholders
-    if username == placeholder2 or username.strip() == "":
-        show_error_message("Por favor ingrese un nombre de usuario")
-        return
+    def create_widgets(self):
+        self.logo_frame = ctk.CTkFrame(
+            self,
+            fg_color="#FFFFFF",
+            corner_radius=0
+        )
+        self.logo_frame.grid(row=0, column=0, sticky="nsew")
+        
+        try:
+            logo_path = relative_to_assets("nortex_logo.png")
+            logo_pil = Image.open(logo_path)
+            self.logo_image = ctk.CTkImage(
+                light_image=logo_pil,
+                size=(400, 300)
+            )
+            self.logo_label = ctk.CTkLabel(
+                self.logo_frame,
+                image=self.logo_image,
+                text=""
+            )
+            self.logo_label.place(relx=0.5, rely=0.5, anchor="center")
+        except Exception as e:
+            print(f"[v0] Error loading logo: {e}")
+            # Si no se encuentra la imagen, mostrar texto
+            self.logo_label = ctk.CTkLabel(
+                self.logo_frame,
+                text="BONDEADOS\nnortex",
+                font=("Arial", 48, "bold"),
+                text_color="#D02F28"
+            )
+            self.logo_label.place(relx=0.5, rely=0.5, anchor="center")
+        
+        self.login_frame = ctk.CTkFrame(
+            self,
+            fg_color="#1A1464",
+            corner_radius=0
+        )
+        self.login_frame.grid(row=0, column=1, sticky="nsew")
+        
+        self.login_frame.grid_rowconfigure(0, weight=1)
+        self.login_frame.grid_rowconfigure(1, weight=0)
+        self.login_frame.grid_rowconfigure(2, weight=0)
+        self.login_frame.grid_rowconfigure(3, weight=0)
+        self.login_frame.grid_rowconfigure(4, weight=0)
+        self.login_frame.grid_rowconfigure(5, weight=0)
+        self.login_frame.grid_rowconfigure(6, weight=1)
+        self.login_frame.grid_columnconfigure(0, weight=1)
+        
+        self.username_entry = ctk.CTkEntry(
+            self.login_frame,
+            placeholder_text="Nombre de usuario",
+            fg_color="#FFFFFF",
+            text_color="#000000",
+            placeholder_text_color="gray",
+            border_color="#D02F28",
+            border_width=2,
+            corner_radius=5,
+            height=40,
+            width=350
+        )
+        self.username_entry.grid(row=1, column=0, padx=30, pady=(20, 10))
+        
+        self.password_entry = ctk.CTkEntry(
+            self.login_frame,
+            placeholder_text="Contraseña",
+            show="*",
+            fg_color="#FFFFFF",
+            text_color="#000000",
+            placeholder_text_color="gray",
+            border_color="#D02F28",
+            border_width=2,
+            corner_radius=5,
+            height=40,
+            width=350
+        )
+        self.password_entry.grid(row=2, column=0, padx=30, pady=10)
+        
+        self.show_password_checkbox = ctk.CTkCheckBox(
+            self.login_frame,
+            text="Mostrar Contraseña",
+            variable=self.show_password,
+            command=self.toggle_password,
+            fg_color="#D02F28",
+            hover_color="#B02820",
+            border_color="#D02F28",
+            text_color="#D02F28",
+            font=("Arial", 12)
+        )
+        self.show_password_checkbox.grid(row=3, column=0, padx=62, pady=10)
+        
+        self.login_button = ctk.CTkButton(
+            self.login_frame,
+            text="Inicio de sesión",
+            command=self.handle_login,
+            fg_color="#FFFFFF",
+            text_color="#000000",
+            hover_color="#F0F0F0",
+            border_color="#D02F28",
+            border_width=3,
+            corner_radius=5,
+            height=40,
+            width=20,
+            font=("Arial", 14, "bold")
+        )
+        self.login_button.grid(row=4, column=0, padx=30, pady=20)
+        
+        self.error_frame = ctk.CTkFrame(
+            self.login_frame,
+            fg_color="transparent"
+        )
+        self.error_frame.grid(row=5, column=0, padx=30, pady=5, sticky="ew")
+        self.error_frame.grid_remove()
     
-    if password == placeholder or password.strip() == "":
-        show_error_message("Por favor ingrese una contraseña")
-        return
+    def toggle_password(self):
+        """Alterna la visibilidad de la contraseña"""
+        if self.show_password.get():
+            self.password_entry.configure(show="")
+        else:
+            self.password_entry.configure(show="*")
     
-    # Intentar autenticación
-    success, message = authenticate_user(username, password)
+    def show_error_message(self, message):
+        """Muestra mensaje de error en la interfaz"""
+        self.error_frame.grid()
+        
+        # Limpiar frame de error
+        for widget in self.error_frame.winfo_children():
+            widget.destroy()
+        
+        error_container = ctk.CTkFrame(
+            self.error_frame,
+            fg_color="#FFFFFF",
+            border_color="#D02F28",
+            border_width=2,
+            corner_radius=5
+        )
+        error_container.pack(fill="x", padx=5, pady=5)
+        
+        error_label = ctk.CTkLabel(
+            error_container,
+            text=f"⚠ {message}",
+            text_color="#D02F28",
+            font=("Arial", 11)
+        )
+        error_label.pack(padx=10, pady=8)
     
-    if success:
-        hide_error_message()
-        messagebox.showinfo("Éxito", "Inicio de sesión exitoso")
-        # Aquí puedes agregar código para abrir la siguiente ventana o funcionalidad
-    else:
-        show_error_message("Acceso denegado: verifique su usuario y su contraseña")
-
-def show_error_message(message):
-    """Muestra mensaje de error en la interfaz"""
-    # Crear rectángulo de fondo para el mensaje de error
-    canvas.create_rectangle(
-        419.0, 60.0, 840.0, 120.0,
-        fill="#FFFFFF", outline="#D02F28", width=2,
-        tags="error_message"
-    )
-    canvas.create_text(
-        445, 85, text="⚠", fill="#D02F28", 
-        font=("Arial", 12, "bold"),
-        tags="error_message"
-    )
+    def hide_error_message(self):
+        """Oculta el mensaje de error"""
+        self.error_frame.grid_remove()
     
-    # Crear texto del mensaje
-    canvas.create_text(
-        460.0, 90.0,
-        anchor="w",
-        text=message,
-        fill="#000000",
-        font=("Arial", 11),
-        tags="error_message"
-    )
+    def handle_login(self):
+        """Maneja el proceso de login"""
+        username = self.username_entry.get().strip()
+        password = self.password_entry.get().strip()
+        
+        # Validar que no estén vacíos
+        if username == "":
+            self.show_error_message("Por favor ingrese un nombre de usuario")
+            return
+        
+        if password == "":
+            self.show_error_message("Por favor ingrese una contraseña")
+            return
+        
+        # Intentar autenticación
+        success, message = authenticate_user(username, password)
+        
+        if success:
+            self.hide_error_message()
+            messagebox.showinfo("Éxito", "Inicio de sesión exitoso")
+            # Aquí puedes agregar código para abrir la siguiente ventana
+        else:
+            self.show_error_message("Acceso denegado: verifique su usuario y su contraseña")
 
-def hide_error_message():
-    """Oculta el mensaje de error"""
-    canvas.delete("error_message")
-
-window = Tk()
-
-window.geometry("1194x639")
-window.configure(bg = "#FFFFFF")
-
-
-canvas = Canvas(
-    window,
-    bg = "#FFFFFF",
-    height = 639,
-    width = 1194,
-    bd = 0,
-    highlightthickness = 0,
-    relief = "ridge"
-)
-
-canvas.place(x = 0, y = 0)
-image_image_1 = PhotoImage(
-    file=relative_to_assets("image_1.png"))
-image_1 = canvas.create_image(
-    515.0,
-    320.0,
-    image=image_image_1
-)
-
-canvas.create_rectangle(
-    964.0,
-    0.0,
-    1194.0,
-    639.0,
-    fill="#1A1464",
-    outline="")
-entry_1 = Entry(
-    bd=0,
-    bg="#FFFFFF",
-    fg="#000716",
-    highlightthickness=2,
-    highlightbackground="#D02F28",
-    highlightcolor="#FF0303"
-)
-entry_1.place(
-    x=1007.0,
-    y=316.0,
-    width=143.0,
-    height=35.0
-)
-placeholder = "Contraseña"
-entry_1.insert(0, placeholder)
-entry_1.config(fg="gray")
-
-def on_focus_in(event):
-    if entry_1.get() == placeholder:
-        entry_1.delete(0, "end")
-        entry_1.config(fg="#000716")
-    if not checkbox_checked[0]: 
-        entry_1.config(show="*")
-
-def on_focus_out(event):
-    if entry_1.get() == "":
-        entry_1.insert(0, placeholder)
-        entry_1.config(fg="gray",show="")
-
-entry_1.bind("<FocusIn>", on_focus_in)
-entry_1.bind("<FocusOut>", on_focus_out)
-
-entry_2 = Entry(
-    bd=0,
-    bg="#FFFFFF",
-    fg="#000716",
-    highlightthickness=2,
-    highlightbackground="#D02F28",
-    highlightcolor="#FF0303"
-)
-entry_2.place(
-    x=1007.0,
-    y=228.0,
-    width=143.0,
-    height=35.0
-)
-placeholder2 = "Nombre de usuario"
-entry_2.insert(0, placeholder2)
-entry_2.config(fg="gray")
-
-def on_focus_in2(event):
-    if entry_2.get() == placeholder2:
-        entry_2.delete(0, "end")
-        entry_2.config(fg="#000716")
-
-def on_focus_out2(event):
-    if entry_2.get() == "":
-        entry_2.insert(0, placeholder2)
-        entry_2.config(fg="gray")
-
-entry_2.bind("<FocusIn>", on_focus_in2)
-entry_2.bind("<FocusOut>", on_focus_out2)
-
-checkbox_rect = canvas.create_rectangle(
-    1000.0,
-    402.0,
-    1020.0,
-    420.0,
-    fill="#FFFFFF",
-    outline="#D02F28"
-)
-
-# Variable to track checkbox state
-checkbox_checked = [False]  # Use list for mutability in nested function
-
-def toggle_password(event):
-    checkbox_checked[0] = not checkbox_checked[0]
-    if checkbox_checked[0]:
-        entry_1.config(show="")
-        # Draw checkmark
-        canvas.create_line(1004, 410, 1010, 416, fill="#D02F28", width=2, tag="checkmark")
-        canvas.create_line(1010, 416, 1018, 404, fill="#D02F28", width=2, tag="checkmark")
-    else:
-        if entry_1.get() != placeholder:
-            entry_1.config(show="*")
-            # Remove checkmark
-        canvas.delete("checkmark")
-
-# Bind click event to the rectangle
-canvas.tag_bind(checkbox_rect, "<Button-1>", toggle_password)
-
-# Set password entry to hidden by default
-entry_1.config(show="")
-
-canvas.create_text(
-    1023.0,
-    403.0,
-    anchor="nw",
-    text="Mostrar contraseña",
-    fill="#D02F28",
-    font=("HammersmithOne Regular", 14 * -1)
-)
-border_frame = Frame(window, bg="red", highlightthickness=0)
-border_frame.place(x=1013, y=457, width=128, height=25)
-button_1 = Button(
-    border_frame,
-    text="Iniciar sesión",
-    borderwidth=0,         # No internal border
-    bg="#FFFFFF",          # Button background
-    activebackground="#F0F0F0",
-    command=handle_login,  # Updated to call login function
-    relief="flat"
-)
-button_1.pack(fill="both", expand=True, padx=2, pady=2)
-
-window.bind('<Return>', lambda event: handle_login())
-
-window.resizable(False, False)
-window.mainloop()
+if __name__ == "__main__":
+    ctk.set_appearance_mode("light")
+    ctk.set_default_color_theme("blue")
+    
+    app = LoginApp()
+    app.mainloop()
