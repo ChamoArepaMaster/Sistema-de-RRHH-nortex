@@ -3,7 +3,7 @@ import customtkinter as ctk
 
 # Configuración de rutas para assets
 OUTPUT_PATH = Path(__file__).parent
-ASSETS_PATH = OUTPUT_PATH / Path(r"E:\Sistema\Logeo\assets\frame0")
+ASSETS_PATH = OUTPUT_PATH / Path(r"C:\Users\gamer\Documents\Sistema-de-RRHH-nortex\Logeo\assets\frame0")
 
 def relative_to_assets(path: str) -> Path:
     return ASSETS_PATH / Path(path)
