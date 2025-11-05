@@ -19,11 +19,8 @@ class NortexApp(ctk.CTk):
         self.title("Sistema Nortex")
         self.geometry("1188x630")
         self.minsize(800, 500)
-        self.resizable(True, True)
+        self.resizable(True, True)        
         
-        self.bind("<Configure>", self.on_window_resize)
-        
-        # Crear la interfaz
         self.create_widgets()
     
     def abrir_emergente(self, titulo: str, mensaje: str):
@@ -54,7 +51,7 @@ class NortexApp(ctk.CTk):
             hover_color="#2A2474"
         )
         btn_cerrar.pack(pady=10)
-    
+
     def create_widgets(self):
         self.top_frame = ctk.CTkFrame(
             self,
@@ -83,7 +80,7 @@ class NortexApp(ctk.CTk):
         # Botón 2: Vac/Pen
         self.btn_vac_pen = self.create_icon_button(
             self.buttons_frame,
-            "Vac/Pen",
+            "Vacaciones/Pendientes",
             "logo2.png",
             lambda: self.abrir_emergente("Vacaciones/Pendientes", "hola")
         )
@@ -116,6 +113,23 @@ class NortexApp(ctk.CTk):
         )
         self.btn_lista_empleados.grid(row=0, column=4, padx=10)
         
+        # Botón 6: Lista de Usuarios
+        self.btn_lista_usuarios = self.create_icon_button(
+            self.buttons_frame,
+            "Lista de Usuarios",
+            "logo7.png",
+            lambda: self.abrir_emergente("Lista de Usuarios", "bro")
+        )
+        self.btn_lista_usuarios.grid(row=0, column=5, padx=10)
+        
+        # Botón 7: Configuración
+        self.btn_configuracion = self.create_icon_button(
+            self.buttons_frame,
+            "Configuración",
+            "logo10.png",
+            lambda: self.abrir_emergente("Configuración", "bro")
+        )
+        self.btn_configuracion.grid(row=0, column=6, padx=10)
         
         # Frame central para el logo
         self.center_frame = ctk.CTkFrame(
@@ -173,7 +187,6 @@ class NortexApp(ctk.CTk):
         )
         btn_frame.pack_propagate(False)
         
-
         try:
             icon_image = ctk.CTkImage(
                 light_image=self.load_image(image_name),
@@ -187,7 +200,7 @@ class NortexApp(ctk.CTk):
             icon_label.pack(pady=(8, 0))
         except Exception as e:
             print(f"Error loading {image_name}: {e}")
-            # Si no se puede cargar la imagen, mostrar un placeholder
+            # Fallback to text icon if image fails to load
             icon_label = ctk.CTkLabel(
                 btn_frame,
                 text="📄",
@@ -195,7 +208,7 @@ class NortexApp(ctk.CTk):
             )
             icon_label.pack(pady=(8, 0))
         
-
+        # Etiqueta de texto
         text_label = ctk.CTkLabel(
             btn_frame,
             text=text,
@@ -211,12 +224,12 @@ class NortexApp(ctk.CTk):
             btn_frame.configure(fg_color="#FFFFFF", border_color="#000000")
         
         def on_click(e):
-         
+            # Efecto de presión
             btn_frame.configure(fg_color="#D0D0D0")
             self.after(100, lambda: btn_frame.configure(fg_color="#F0F0F0"))
             self.after(200, command)
         
-    
+        # Vincular eventos a todos los elementos
         for widget in [btn_frame, icon_label, text_label]:
             widget.bind("<Enter>", on_enter)
             widget.bind("<Leave>", on_leave)
@@ -229,22 +242,6 @@ class NortexApp(ctk.CTk):
         from PIL import Image
         image_path = relative_to_assets(image_name)
         return Image.open(image_path)
-    
-    def on_window_resize(self, event):
-        """Maneja el redimensionamiento de la ventana y adapta el logo"""
-        if event.widget == self:
-           
-            window_width = self.winfo_width()
-            
-            new_width = min(int(window_width * 0.5), 600)
-            new_height = int(new_width * 0.5) 
-            
-         
-            if hasattr(self, 'logo_image'):
-                try:
-                    self.logo_image.configure(size=(new_width, new_height))
-                except Exception as e:
-                    print(f"Error resizing logo: {e}")
     
     def cerrar_sesion(self):
         """Cierra la aplicación"""
