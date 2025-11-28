@@ -4,6 +4,9 @@ from tkinter import messagebox
 from PIL import Image
 import psycopg2
 
+# 📌 AGREGADO: importar la otra pantalla
+from pantalla.build.administrador import AdministradorApp
+
 OUTPUT_PATH = Path(__file__).parent
 ASSETS_PATH = OUTPUT_PATH / "assets"
 
@@ -14,10 +17,10 @@ def connect_to_database():
     """Establece conexión con la base de datos PostgreSQL"""
     try:
         connection = psycopg2.connect(
-            host="25.40.205.49",  
+            host="localhost",  
             database="postgres".encode('utf-8').decode('utf-8'),
-            user="Mamon".encode('utf-8').decode('utf-8'),
-            password="7sonmasque6".encode('utf-8').decode('utf-8'),
+            user="postgres".encode('utf-8').decode('utf-8'),
+            password="Angelnuevo2903".encode('utf-8').decode('utf-8'),
             client_encoding='utf8'
         )
         return connection
@@ -57,16 +60,14 @@ class LoginApp(ctk.CTk):
         self.minsize(800, 500)
         
         self.grid_rowconfigure(0, weight=1)
-        self.grid_columnconfigure(0, weight=9)  # Logo section - increased weight
-        self.grid_columnconfigure(1, weight=2)  # Login panel - decreased weight
+        self.grid_columnconfigure(0, weight=9)
+        self.grid_columnconfigure(1, weight=2)
         
-        # Variables
         self.show_password = ctk.BooleanVar(value=False)
         self.error_label = None
         
         self.create_widgets()
         
-        # Bind Enter key to login
         self.bind('<Return>', lambda event: self.handle_login())
     
     def create_widgets(self):
@@ -92,7 +93,6 @@ class LoginApp(ctk.CTk):
             self.logo_label.place(relx=0.5, rely=0.5, anchor="center")
         except Exception as e:
             print(f"[v0] Error loading logo: {e}")
-            # Si no se encuentra la imagen, mostrar texto
             self.logo_label = ctk.CTkLabel(
                 self.logo_frame,
                 text="BONDEADOS\nnortex",
@@ -109,11 +109,6 @@ class LoginApp(ctk.CTk):
         self.login_frame.grid(row=0, column=1, sticky="nsew")
         
         self.login_frame.grid_rowconfigure(0, weight=1)
-        self.login_frame.grid_rowconfigure(1, weight=0)
-        self.login_frame.grid_rowconfigure(2, weight=0)
-        self.login_frame.grid_rowconfigure(3, weight=0)
-        self.login_frame.grid_rowconfigure(4, weight=0)
-        self.login_frame.grid_rowconfigure(5, weight=0)
         self.login_frame.grid_rowconfigure(6, weight=1)
         self.login_frame.grid_columnconfigure(0, weight=1)
         
@@ -165,7 +160,6 @@ class LoginApp(ctk.CTk):
             command=self.handle_login,
             fg_color="#FFFFFF",
             text_color="#000000",
-            hover_color="#F0F0F0",
             border_color="#D02F28",
             border_width=3,
             corner_radius=5,
@@ -183,17 +177,14 @@ class LoginApp(ctk.CTk):
         self.error_frame.grid_remove()
     
     def toggle_password(self):
-        """Alterna la visibilidad de la contraseña"""
         if self.show_password.get():
             self.password_entry.configure(show="")
         else:
             self.password_entry.configure(show="*")
     
     def show_error_message(self, message):
-        """Muestra mensaje de error en la interfaz"""
         self.error_frame.grid()
         
-        # Limpiar frame de error
         for widget in self.error_frame.winfo_children():
             widget.destroy()
         
@@ -215,15 +206,12 @@ class LoginApp(ctk.CTk):
         error_label.pack(padx=10, pady=8)
     
     def hide_error_message(self):
-        """Oculta el mensaje de error"""
         self.error_frame.grid_remove()
     
     def handle_login(self):
-        """Maneja el proceso de login"""
         username = self.username_entry.get().strip()
         password = self.password_entry.get().strip()
         
-        # Validar que no estén vacíos
         if username == "":
             self.show_error_message("Por favor ingrese un nombre de usuario")
             return
@@ -232,13 +220,16 @@ class LoginApp(ctk.CTk):
             self.show_error_message("Por favor ingrese una contraseña")
             return
         
-        # Intentar autenticación
         success, message = authenticate_user(username, password)
         
         if success:
             self.hide_error_message()
-            messagebox.showinfo("Éxito", "Inicio de sesión exitoso")
-            # Aquí puedes agregar código para abrir la siguiente ventana
+
+            # 📌 CERRAR LOGIN Y ABRIR PANTALLA DE administrador.py
+            self.destroy()
+            app_admin = AdministradorApp()
+            app_admin.mainloop()
+
         else:
             self.show_error_message("Acceso denegado: verifique su usuario y su contraseña")
 
