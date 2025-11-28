@@ -2,7 +2,6 @@ import customtkinter as ctk
 from tkinter import ttk
 from datetime import datetime, timedelta
 import tkinter as tk
-from tkinter import messagebox
 
 ctk.set_appearance_mode("light")
 ctk.set_default_color_theme("blue")
@@ -125,7 +124,7 @@ class ReporteDiarioApp:
 
         self.selected_date = datetime.now().strftime("%d/%m/%Y")
         
-        # Variable para el widget de edición
+        # <CHANGE> Variable para el widget de edición
         self.entry_popup = None
 
         self.crear_layout()
@@ -149,7 +148,7 @@ class ReporteDiarioApp:
         self.selected_date = value
         print(f"Fecha seleccionada: {self.selected_date}")
 
-    # Nueva función para editar celdas
+    # <CHANGE> Nueva función para editar celdas
     def on_double_click(self, event):
         """Maneja el doble clic en una celda para editarla"""
         # Cerrar cualquier entrada anterior
@@ -208,30 +207,6 @@ class ReporteDiarioApp:
         self.entry_popup.bind("<Return>", save_edit)
         self.entry_popup.bind("<FocusOut>", save_edit)
         self.entry_popup.bind("<Escape>", cancel_edit)
-
-    def grabar_datos(self):
-        """Guarda los datos de la tabla en memoria"""
-        datos = []
-        for item in self.tree.get_children():
-            valores = self.tree.item(item)["values"]
-            # Solo guardar filas que tengan al menos un valor no vacío
-            if any(str(v).strip() for v in valores):
-                datos.append(valores)
-        
-        # Aquí podrías agregar lógica para guardar en base de datos u otro destino
-        print(f"Datos guardados: {len(datos)} registros")
-        messagebox.showinfo("Éxito", f"Se guardaron {len(datos)} registros en memoria")
-
-    def exportar_datos(self):
-        """Exporta los datos de la tabla"""
-        datos = []
-        for item in self.tree.get_children():
-            valores = self.tree.item(item)["values"]
-            if any(str(v).strip() for v in valores):
-                datos.append(valores)
-        
-        print(f"Exportar datos: {len(datos)} registros")
-        messagebox.showinfo("Exportar", f"Se exportarían {len(datos)} registros")
 
     def crear_layout(self):
         main_frame = ctk.CTkFrame(self.window, fg_color=self.color_blanco)
@@ -312,7 +287,7 @@ class ReporteDiarioApp:
         for i in range(10):
             self.tree.insert("", "end", values=("",) * len(columns))
 
-        # Agregar binding para doble clic
+        # <CHANGE> Agregar binding para doble clic
         self.tree.bind("<Double-Button-1>", self.on_double_click)
 
         self.tree.pack(fill="both", expand=True, side="left")
@@ -334,8 +309,7 @@ class ReporteDiarioApp:
             hover_color=self.color_gris,
             font=("Arial", 11, "bold"),
             border_width=2,
-            border_color=self.color_rojo,
-            command=self.exportar_datos
+            border_color=self.color_rojo
         )
         btn_exportar.pack(side="left", padx=10)
 
@@ -349,8 +323,7 @@ class ReporteDiarioApp:
             hover_color=self.color_gris,
             font=("Arial", 11, "bold"),
             border_width=2,
-            border_color=self.color_rojo,
-            command=self.grabar_datos
+            border_color=self.color_rojo
         )
         btn_grabar.pack(side="left", padx=10, expand=True)
 
